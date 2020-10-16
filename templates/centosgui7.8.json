@@ -1,0 +1,95 @@
+{
+    "type": "Microsoft.VirtualMachineImages/imageTemplates",
+    "apiVersion": "2019-05-01-preview",
+    "location": "<region>",
+    "dependsOn": [],
+    "tags": {
+        "imagebuilderTemplate": "centos78",
+        "userIdentity": "enabled"
+            },
+        "identity": {
+            "type": "UserAssigned",
+                    "userAssignedIdentities": {
+                    "<imgBuilderId>": {}
+                }
+                },
+    "properties": {
+
+        "buildTimeoutInMinutes" : 80,
+        
+        "vmProfile": 
+            {
+            "vmSize": "Standard_D4_v3",
+            "osDiskSizeGB": 30
+            },
+
+        "source": {
+            "type": "PlatformImage",
+                "publisher": "OpenLogic",
+                "offer": "CentOS",
+                "sku": "7_8",
+                "version": "7.8.2020062400"
+            
+        },
+        "customize": [
+            {
+                "type": "Shell",
+                "name": "kernel and LIS",
+                "inline": [
+                    "yum install -y epel-release", 
+                    "yum install --releasever=7.8.2003 --disablerepo=openlogic -y kernel-devel-3.10.0-1127.13.1.el7.x86_64 kernel-headers-3.10.0-1127.13.1.el7.x86_64 kernel-tools-3.10.0-1127.13.1.el7.x86_64 dkms"
+                ]
+            },
+            {
+                "type": "Shell",
+                "name": "CycleCloud deps",
+                "inline": [
+                    "yum install -y ntp fail2ban nfs-utils samba samba-client ganglia-gmetad ganglia-gmond ganglia-gmond-python"
+                ]
+            },
+            {
+                "type": "Shell",
+                "name": "xrdp",
+                "inline": [
+                    "yum install -y xrdp",
+                    "systemctl enable xrdp",
+                    "systemctl start xrdp"
+                ]
+            },
+            {
+                "type": "Shell",
+                "name": "Desktop",
+                "inline": [
+                    "yum groupinstall \"GNOME DESKTOP\" -y",
+                    "systemctl set-default graphical.target"
+                ]
+            },
+            {
+                "type": "Shell",
+                "name": "Install NVIDIA",
+                "inline": [
+                    "#CUDA_REPO_PKG=cuda-repo-rhel7-10.0.130-1.x86_64.rpm",
+                    "#wget http://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/${CUDA_REPO_PKG} -O /tmp/${CUDA_REPO_PKG}",
+                    "#rpm -ivh /tmp/${CUDA_REPO_PKG}",
+                    "#rm -f /tmp/${CUDA_REPO_PKG}",
+                    "#yum -y install cuda-drivers"
+                ]
+            }
+        ],
+        "distribute": 
+            [
+                {   "type":"SharedImage",
+                    "galleryImageId": "/subscriptions/<subscriptionID>/resourceGroups/<rgName>/providers/Microsoft.Compute/galleries/<sharedImageName>/images/<imageName>/versions/7.8.<imageNameVersion>",
+                    "location": "<region>",
+                    "runOutputName": "<runOutputName>",
+                    "artifactTags": {
+                        "source": "azVmImageBuilder",
+                        "baseosimg": "centos78"
+                    },
+                    "replicationRegions": [
+                        "westeurope"
+                   ]
+                }
+            ]
+        }
+    }

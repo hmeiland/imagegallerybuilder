@@ -1,0 +1,75 @@
+{
+    "type": "Microsoft.VirtualMachineImages/imageTemplates",
+    "apiVersion": "2019-05-01-preview",
+    "location": "<region>",
+    "dependsOn": [],
+    "tags": {
+        "imagebuilderTemplate": "centos76",
+        "userIdentity": "enabled"
+            },
+        "identity": {
+            "type": "UserAssigned",
+                    "userAssignedIdentities": {
+                    "<imgBuilderId>": {}
+                }
+                },
+    "properties": {
+
+        "buildTimeoutInMinutes" : 80,
+        
+        "vmProfile": 
+            {
+            "vmSize": "Standard_D4_v3",
+            "osDiskSizeGB": 30
+            },
+
+        "source": {
+            "type": "PlatformImage",
+                "publisher": "OpenLogic",
+                "offer": "CentOS",
+                "sku": "7.6",
+                "version": "7.6.201909120"
+            
+        },
+        "customize": [
+            {
+                "type": "Shell",
+                "name": "kernel and LIS",
+                "expect_disconnect": true,
+                "inline": [
+                    "yum install --releasever=7.6.1810 -y kernel-devel kernel-headers kernel-tools epel-release dkms", 
+                    "wget https://aka.ms/lis",
+                    "tar xvzf lis",
+                    "cd LISISO",
+                    "sudo ./install.sh"
+                ]
+            },
+            {
+                "type": "Shell",
+                "name": "Install NVIDIA",
+                "inline": [
+                    "CUDA_REPO_PKG=cuda-repo-rhel7-10.0.130-1.x86_64.rpm",
+                    "wget http://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/${CUDA_REPO_PKG} -O /tmp/${CUDA_REPO_PKG}",
+                    "sudo rpm -ivh /tmp/${CUDA_REPO_PKG}",
+                    "rm -f /tmp/${CUDA_REPO_PKG}",
+                    "sudo yum -y install cuda-drivers"
+                ]
+            }
+        ],
+        "distribute": 
+            [
+                {   "type":"SharedImage",
+                    "galleryImageId": "/subscriptions/<subscriptionID>/resourceGroups/<rgName>/providers/Microsoft.Compute/galleries/<sharedImageName>/images/<imageName>/versions/7.6.<imageNameVersion>",
+                    "location": "<region>",
+                    "runOutputName": "<runOutputName>",
+                    "artifactTags": {
+                        "source": "azVmImageBuilder",
+                        "baseosimg": "centos76"
+                    },
+                    "replicationRegions": [
+                        "westeurope"
+                   ]
+                }
+            ]
+        }
+    }
