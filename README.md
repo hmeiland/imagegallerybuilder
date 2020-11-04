@@ -4,6 +4,8 @@ The Azure imagebuilder service can be used to create OS images and deploy them t
 be maintaining some scripts to create images that are usable for HPC, including e.g. gpu drivers and pre-installed dependencies
 for CycleCloud.
 
+Images are build using the Azure imagebuilder service and created in a shared image gallery.
+
 ## CentOS 7.8
  * base kernel
  * Nvidia GPU driver 10.130

@@ -71,6 +71,25 @@
                     "sed -i -e 's/# OS.EnableRDMA=y/OS.EnableRDMA=y/g' /etc/waagent.conf",
                     "echo \"vm.zone_reclaim_mode = 1\" >> /etc/sysctl.conf"
                 ]
+            },
+            {
+                "type": "Shell",
+                "name": "Install cvmfs",
+                "inline": [
+                    "yum install -y https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest.noarch.rpm",
+                    "yum install -y cvmfs Lmod hwloc numactl",
+                    "cvmfs_config setup",
+                    "curl https://cvmfs.blob.core.windows.net/mpi/mpi.azure.conf -o /etc/cvmfs/config.d/mpi.azure.conf",
+                    "curl https://cvmfs.blob.core.windows.net/mpi/mpi.azure.pub -o /etc/cvmfs/keys/mpi.azure.pub",
+                    "echo 'export MODULEPATH=$(/usr/share/lmod/lmod/libexec/addto --append MODULEPATH /cvmfs/mpi.azure/opt/modules)' > /etc/profile.d/z01_modulepath_cvmfs_mpi.azure.sh"
+                ]
+            },
+            {
+                "type": "Shell",
+                "name": "Install azurehpc prereqs",
+                "inline": [
+                    "yum install -y pssh nc rsync git jq htop screen" 
+                ]
             }
         ],
         "distribute": 
