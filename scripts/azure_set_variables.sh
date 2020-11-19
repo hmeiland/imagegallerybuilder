@@ -17,6 +17,7 @@ case "$META_SKU" in
   *)
     SKU=generic
     ;;
+esac
 
 echo "export AZURE_SKU=${SKU}" > /var/lib/azurehpc/azure_variables.sh
 echo "export AZURE_NVME=${NVME}" >> /var/lib/azurehpc/azure_variables.sh
